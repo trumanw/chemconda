@@ -1,1 +1,1 @@
-from medconda import *
+from chemconda import *
