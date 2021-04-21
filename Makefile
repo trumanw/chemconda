@@ -8,4 +8,5 @@ install:
 	python setup.py install
 
 dist:
+	rm -rf dist/*
 	python setup.py sdist

@@ -8,6 +8,12 @@ On your Jupyter Notebook, run the following code:
 ```python
 !pip install -q chemconda
 
+import os
+os.environ['CHEMCONDA_INSTALL_PATH'] = '/root/miniconda3'
+```
+
+Then you can install miniconda to the `CHEMCONDA_INSTALL_PATH` location:
+```python
 import chemconda
 chemconda.install_miniconda()
 ```

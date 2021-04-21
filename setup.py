@@ -7,7 +7,7 @@ install_requires = [
 setup(
   name = 'chemconda',
   packages=find_packages(),
-  version = '0.0.1',
+  version = '0.0.2',
   license='MIT',
   description = 'Install Conda and add ipykernel easily on Jupyter Notebook/Lab.',
   author = 'Truman Wu',
