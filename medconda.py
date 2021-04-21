@@ -5,7 +5,7 @@ import subprocess
 MINICONDA_SHELL_NAME = 'Miniconda3-py39_4.9.2-Linux-x86_64.sh'
 MINICONDA_SHELL_PREFIX_URL = 'https://repo.anaconda.com/miniconda'
 MINICONDA_SHELL_DOWNLOAD_DIR = '/tmp'
-MINICONDA_INSTALLED_PATH = '/home/jovyan/xtalpi/miniconda3'
+MINICONDA_INSTALLED_PATH = '/home/vintage/miniconda3'
 MINICONDA_INSTALLER = os.path.join(MINICONDA_SHELL_DOWNLOAD_DIR, MINICONDA_SHELL_NAME)
 
 def exec_subprocess(cmd, is_split=False):
@@ -20,7 +20,7 @@ def exec_subprocess(cmd, is_split=False):
     
     if err:
         raise(Exception(err.decode()))
-        
+
 def install_miniconda():
     is_from_remote = True
 
