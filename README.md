@@ -3,8 +3,6 @@ Install Conda and add ipykernel easily on Jupyter Notebook/Lab.
 
 ## Usage
 
-> **TLDR**: Check the [example notebook here](https://colab.research.google.com/drive/1c_RGCgQeLHVXlF44LyOFjfUW32CmG6BP)!)
-
 On your Jupyter Notebook, run the following code:
 
 ```python

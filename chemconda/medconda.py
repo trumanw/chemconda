@@ -2,10 +2,16 @@ import os
 import requests
 import subprocess
 
-MINICONDA_SHELL_NAME = 'Miniconda3-py39_4.9.2-Linux-x86_64.sh'
-MINICONDA_SHELL_PREFIX_URL = 'https://repo.anaconda.com/miniconda'
-MINICONDA_SHELL_DOWNLOAD_DIR = '/tmp'
-MINICONDA_INSTALLED_PATH = '/home/vintage/miniconda3'
+# Constants
+# ENV VARS
+# - MEDCONDA_INSTALL_PATH: the target miniconda installing location
+# - MEDCONDA_BINARY: the name of the Miniconda installer
+# - MEDCONDA_PREFIX_URI: the prefix URI of the Miniconda installer
+# - MEDCONDA_DOWNLOAD_DIR: the local directory used for keeping downloading installer
+MINICONDA_INSTALLED_PATH = os.getenv(MEDCONDA_INSTALL_PATH, '/home/vintage/miniconda3')
+MINICONDA_SHELL_NAME = os.getenv(MEDCONDA_BINARY,'Miniconda3-py39_4.9.2-Linux-x86_64.sh')
+MINICONDA_SHELL_PREFIX_URL = os.getenv(MEDCONDA_PREFIX_URI,'https://repo.anaconda.com/miniconda')
+MINICONDA_SHELL_DOWNLOAD_DIR = os.getenv(MEDCONDA_DOWNLOAD_DIR ,'/tmp')
 MINICONDA_INSTALLER = os.path.join(MINICONDA_SHELL_DOWNLOAD_DIR, MINICONDA_SHELL_NAME)
 
 def exec_subprocess(cmd, is_split=False):
@@ -21,7 +27,7 @@ def exec_subprocess(cmd, is_split=False):
     if err:
         raise(Exception(err.decode()))
 
-def install_miniconda():
+def install_miniconda(installed_dir=MINICONDA_INSTALLED_PATH):
     is_from_remote = True
 
     # install miniconda
