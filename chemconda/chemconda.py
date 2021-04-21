@@ -8,10 +8,10 @@ import subprocess
 # - CHEMCONDA_BINARY: the name of the Miniconda installer
 # - CHEMCONDA_PREFIX_URI: the prefix URI of the Miniconda installer
 # - CHEMCONDA_DOWNLOAD_DIR: the local directory used for keeping downloading installer
-MINICONDA_INSTALLED_PATH = os.getenv(CHEMCONDA_INSTALL_PATH, '/home/vintage/miniconda3')
-MINICONDA_SHELL_NAME = os.getenv(CHEMCONDA_BINARY,'Miniconda3-py39_4.9.2-Linux-x86_64.sh')
-MINICONDA_SHELL_PREFIX_URL = os.getenv(CHEMCONDA_PREFIX_URI,'https://repo.anaconda.com/miniconda')
-MINICONDA_SHELL_DOWNLOAD_DIR = os.getenv(CHEMCONDA_DOWNLOAD_DIR ,'/tmp')
+MINICONDA_INSTALLED_PATH = os.getenv("CHEMCONDA_INSTALL_PATH", '/home/vintage/miniconda3')
+MINICONDA_SHELL_NAME = os.getenv("CHEMCONDA_BINARY", 'Miniconda3-py39_4.9.2-Linux-x86_64.sh')
+MINICONDA_SHELL_PREFIX_URL = os.getenv("CHEMCONDA_PREFIX_URI", 'https://repo.anaconda.com/miniconda')
+MINICONDA_SHELL_DOWNLOAD_DIR = os.getenv("CHEMCONDA_DOWNLOAD_DIR", '/tmp')
 MINICONDA_INSTALLER = os.path.join(MINICONDA_SHELL_DOWNLOAD_DIR, MINICONDA_SHELL_NAME)
 
 def exec_subprocess(cmd, is_split=False):

@@ -1,1 +1,1 @@
-from chemconda import *
+from .chemconda import *
