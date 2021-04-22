@@ -42,6 +42,30 @@ chemconda.install_package(['rdkit', 'numpy'], 'aidd')
 
 > NOTICE: after restart the kernel of Jupyter or refresh the webpage, you can also "Select Kernel" added previously. 
 
+If the server restarted and you want to restore the kernel, you can open a base environment Python env and re-add the ipykernel by
+
+```python
+!pip install -q chemconda
+
+## make sure adding the environment before anything else
+import os
+os.environ['CHEMCONDA_INSTALL_PATH'] = '/root/miniconda3'
+
+import chemconda
+## skip installation if it has already existed
+chemconda.install_miniconda()
+## re-add the ipykernel to the jupyter
+chemconda.prepare_miniconda_env(env_name="aidd", is_new_kernel=True)
+```
+
+Then you can see the kernel is optional:
+
+```
+!jupyter kernelspec list
+```
+
+which the output lines have the `env_name` listed inside.
+
 ## Environment variables as settings
 
 There are several pre-config environment variables which could control the actions of the conda environment setup:
