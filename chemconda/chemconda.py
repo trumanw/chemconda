@@ -88,6 +88,11 @@ def prepare_miniconda_env(env_name="aidd", python_ver="3.8", is_new_kernel=False
             
         os.system('{} kernel install --name "{}" --user'.format(ipython_bin, env_name))
 
+    # additional sidecar package
+    install_package(package_names=['jedi=0.18'], env_name=env_name, add_channels=['conda-forge'])
+    # to overwrite the jedi=0.17 installed in the jupyter lab(if existed)
+    # ...
+
 def remove_miniconda_env(env_name="aidd"):
     
     # check if the ipykernel exists
