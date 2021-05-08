@@ -81,3 +81,7 @@ There are several pre-config environment variables which could control the actio
 # - CHEMCONDA_DOWNLOAD_DIR: the local directory used for keeping downloading installer,
 #       default: /tmp
 ```
+
+## Coming features:
+- Rich command line interface.
+- Dotenv with better usage of ENV VAR loading.
