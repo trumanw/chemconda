@@ -1,70 +1,81 @@
 # chemconda
 Install Conda and add ipykernel easily on Jupyter Notebook/Lab.
 
-## Usage
+## Usage (cmd)
 
-On your Jupyter Notebook, run the following code:
+### 1. Install a new miniconda
 
-```python
-!pip install -q chemconda
-
-import os
-os.environ['CHEMCONDA_INSTALL_PATH'] = '/root/miniconda3'
+```shell
+pip install -q chemconda
 ```
 
-Then you can install miniconda to the `CHEMCONDA_INSTALL_PATH` location:
-```python
-import chemconda
-chemconda.install_miniconda()
+After installing completed, we can install a new miniconda through the command below:
+
+```shell
+chemconda setup \
+    -d /root/miniconda3 \
+    -v Miniconda3-py39_4.9.2-Linux-x86_64
 ```
 
-After the miniconda installed, you can create an conda env and add to ipykernel:
+which the sub-command `setup` accepts a directory path and installs the veresion `Miniconda3-py39_4.9.2-Linux-x86_64` from the [Miniconda](https://repo.anaconda.com/miniconda/) repository website. Also you can change the `-v` to be any other version listed on the repository website.
 
-```python
-import chemconda
-chemconda.prepare_miniconda_env(env_name="aidd", is_new_kernel=True)
+### 2. Create a new conda env and add to the jupyter kernels.
+
+Before we start to create any new conda env, please make sure the environment variable `CHEMCONDA_HOME_PATH` is correctly set to the miniconda installing path above. Otherwise, you should move to the installed miniconda root path and execute the lines below to reset the `CHEMCONDA_HOME_PATH`:
+
+```shell
+cd /root/miniconda3
+chemconda setup -d ./
 ```
 
-Also, you can permantly delete a conda env by:
+After `CHEMCONDA_HOME_PATH` is correctly setup, run the lines below to create a new conda env:
 
-```python
-import chemconda
-chemconda.remove_miniconda_env(env_name="aidd")
+```shell
+chemconda new -n aidd
 ```
 
-After the conda environment has been prepared, you can using the lines below to install packages to target environment:
+The sub-commmand `new` accepts one name after `-n` and create a new conda env under the `[CHEMCONDA_HOME_PATH]\env` path.
 
-```python
-import chemconda
-# install rdkit and numpy to aidd env 
-chemconda.install_package(['rdkit', 'numpy'], 'aidd')
+### 3. Install Python package to the specific conda env
+
+Before install any Python package, please make sure again the `CHEMCONDA_HOME_PATH` is correctly set:
+
+```shell
+echo $CHEMCONDA_HOME_PATH
 ```
 
-> NOTICE: after restart the kernel of Jupyter or refresh the webpage, you can also "Select Kernel" added previously. 
+Here I try to install latest `rdkit` and `numpy` packages from `conda-forge` channel:
 
-If the server restarted and you want to restore the kernel, you can open a base environment Python env and re-add the ipykernel by
-
-```python
-!pip install -q chemconda
-
-## make sure adding the environment before anything else
-import os
-os.environ['CHEMCONDA_INSTALL_PATH'] = '/root/miniconda3'
-
-import chemconda
-## skip installation if it has already existed
-chemconda.install_miniconda()
-## re-add the ipykernel to the jupyter
-chemconda.prepare_miniconda_env(env_name="aidd", is_new_kernel=True)
+```shell
+chemconda add \
+    -n env_name \
+    -p rdkit \
+    -p numpy \
+    -c conda-forge
 ```
 
-Then you can see the kernel is optional:
+which the statement equals the command below:
+
+```shell
+conda install rdkit numpy --name env_name -c conda-forge -y
+```
+
+### 4. Restore conda kernel
+
+Given the situation of the whole instance on Cloud is recovered and restarted with mountable HD driver, we can move the rootpath of miniconda installed on the moutable HD driver and run the lines below to re-add the conda env to the Jupyter kernelspec list:
+
+```shell
+pip install chemconda
+cd [CHEMCONDA_HOME_PATH]
+chemconda setup -d ./
+chemconda new -n env_name
+```
+
+In case, you can also list all the current available kernels to ensure the `aidd` is listed:
 
 ```
-!jupyter kernelspec list
+jupyter kernelspec list
 ```
-
-which the output lines have the `env_name` listed inside.
 
 ## Environment variables as settings
 

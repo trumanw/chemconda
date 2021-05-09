@@ -1,13 +1,16 @@
 from setuptools import setup, find_packages
+from chemconda import __version__
 
 install_requires = [
   'requests',
+  'Click',
+  'rich',
 ]
 
 setup(
   name = 'chemconda',
   packages=find_packages(),
-  version = '0.0.4',
+  version = __version__,
   license='MIT',
   description = 'Install Conda and add ipykernel easily on Jupyter Notebook/Lab.',
   author = 'Truman Wu',
@@ -28,4 +31,8 @@ setup(
     'Programming Language :: Python :: 3.8',
     'Programming Language :: Python :: 3.9',
   ],
+  entry_points='''
+    [console_scripts]
+    chemconda=chemconda.cli:cli
+  '''
 )
