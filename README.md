@@ -83,11 +83,11 @@ There are several pre-config environment variables which could control the actio
 
 ```python
 # ENV VARS
-# - CHEMCONDA_INSTALL_PATH: the target miniconda installing location, 
+# - CHEMCONDA_HOME_PATH: the target miniconda installing location, 
 #       default: /home/vintage/miniconda3'
-# - CHEMCONDA_BINARY: the name of the Miniconda installer,
+# - CHEMCONDA_INSTALLER: the name of the Miniconda installer,
 #       default: Miniconda3-py39_4.9.2-Linux-x86_64.sh
-# - CHEMCONDA_PREFIX_URI: the prefix URI of the Miniconda installer,
+# - CHEMCONDA_REMOTE_REPO: the prefix URI of the Miniconda installer,
 #       default: https://repo.anaconda.com/miniconda'
 # - CHEMCONDA_DOWNLOAD_DIR: the local directory used for keeping downloading installer,
 #       default: /tmp
