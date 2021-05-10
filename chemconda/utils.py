@@ -52,36 +52,40 @@ def install_conda_env(des, ver=None, config=None, console=None):
     if not console:
         console = Console()
 
+    console.print("Update config...")
+    des_abspath = os.path.abspath(os.path.expanduser(des))
     if not config.home_path:
-        # prepare for another new intallation
-        config.home_path = os.path.abspath(os.path.expanduser(des))
+        # overwrite the CHEMCONDA_HOME_PATH in the ~/.chemconda/config.yaml file
+        config.home_path = des_abspath
         config.installer = ver
     else:
         if config.home_path != os.path.abspath(os.path.expanduser(des)):
             # overwrite the CHEMCONDA_HOME_PATH in the ~/.chemconda/config.yaml file
-            #TODO: update the config file.
-            console.print("CHEMCONDA_HOME_PATH in the file ~/.chemconda/config.yaml is updated.")
-            config.home_path = os.path.abspath(os.path.expanduser(des))
+            config.home_path = des_abspath
 
+    console.print("Config completed:")
+    console.print(config.args_dict())
+            
+    console.print("Setup Miniconda...")
     # validate CHEMCONDA_HOME_PATH is consistent to the config.home_path
     if not os.path.exists(config.home_path):
         # install Miniconda3 from remote repository
         conda_download_url = os.path.join(config.remote_repo, config.installer)
-        conda_download_dir = os.path.join(config.download_dir, config.installer)
 
+        console.print("Cannot find Miniconda installer, downloading from {}".format(conda_download_url))
         res = requests.get(conda_download_url, allow_redirects=True)
         with open(config.installer_path, 'wb') as fw:
             fw.write(res.content)
+        console.print("Downloading completed : {}".format(config.installer_path))
 
+        console.print("Installing {}...".format(config.installer))
         if os.path.isfile(config.installer_path):
             # ensure bash installed
-            console.print("Installing {} ...".format(config.installer))
             os.system("bash {} -b -p {}".format(config.installer_path, config.home_path))
+        console.print("Installing completed.")
 
-        # show the installed Minconda3 home path
-        console.print(config.home_path)
-    else:
-        console.print("{} has been installed.".format(config.home_path))
+    # show the installed Minconda3 home path
+    console.print("Setup completed: conda installed at {}".format(config.home_path), style="bold white")
 
 def install_new_kernel(env_name, python_ver, new_kernel, new_condarc, config=None, console=None):
 
