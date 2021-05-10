@@ -1,8 +1,11 @@
 import os
+import signal
 import requests
 import subprocess
+from threading import Event
 
 from rich.console import Console
+from rich.progress import Progress
 
 from .config import Config
 
@@ -19,6 +22,14 @@ def exec_subprocess(cmd, is_split=False):
     if err:
         raise(Exception(err.decode()))
 
+def rich_exec_subprocess(cmd):
+    sp = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+    while True:
+        line = sp.stdout.readline().rstrip()
+        if not line:
+            break
+        yield line
+
 def install_packages(env_name, package_names, add_channels=None, config=None, console=None):
 
     if not config:
@@ -27,6 +38,7 @@ def install_packages(env_name, package_names, add_channels=None, config=None, co
     if not console:
         console = Console()
     
+    console.print("Start installing packages...")
     # install necessary packages in the new conda
     new_conda_bin = os.path.join(config.home_path, "bin/conda")
     
@@ -34,17 +46,19 @@ def install_packages(env_name, package_names, add_channels=None, config=None, co
         raise Exception("package_names shoud be a list")
     package_lines = " ".join(package_names)
 
-    installer = "{} install --name {} {} -y".format(new_conda_bin, env_name, package_lines)
+    pkg_install_cmd = "{} install --name {} {} -y".format(new_conda_bin, env_name, package_lines)
     if isinstance(add_channels, list) and len(add_channels) > 0:
         channel_lines = " -c ".join(add_channels)
-        installer = installer + " -c {}".format(channel_lines)
+        pkg_install_cmd = pkg_install_cmd + " -c {}".format(channel_lines)
     
     #TODO: logger.info
-    console.print(installer)
-    
-    return exec_subprocess(installer)
+    console.print(pkg_install_cmd)
+    console.print(exec_subprocess(pkg_install_cmd))
+    #FIXME: cannot catch the realtime conda installing stdout...
+    # [console.print(line) for line in rich_exec_subprocess(pkg_install_cmd)]
+        
 
-def install_conda_env(des, ver=None, config=None, console=None):
+def install_conda_env(destination, binary=None, config=None, console=None):
 
     if not config:
         config = Config()
@@ -53,13 +67,13 @@ def install_conda_env(des, ver=None, config=None, console=None):
         console = Console()
 
     console.print("Update config...")
-    des_abspath = os.path.abspath(os.path.expanduser(des))
+    des_abspath = os.path.abspath(os.path.expanduser(destination))
     if not config.home_path:
         # overwrite the CHEMCONDA_HOME_PATH in the ~/.chemconda/config.yaml file
         config.home_path = des_abspath
-        config.installer = ver
+        config.installer = binary
     else:
-        if config.home_path != os.path.abspath(os.path.expanduser(des)):
+        if config.home_path != os.path.abspath(os.path.expanduser(destination)):
             # overwrite the CHEMCONDA_HOME_PATH in the ~/.chemconda/config.yaml file
             config.home_path = des_abspath
 
@@ -73,9 +87,28 @@ def install_conda_env(des, ver=None, config=None, console=None):
         conda_download_url = os.path.join(config.remote_repo, config.installer)
 
         console.print("Cannot find Miniconda installer, downloading from {}".format(conda_download_url))
-        res = requests.get(conda_download_url, allow_redirects=True)
+        res = requests.get(conda_download_url, stream=True, allow_redirects=True)
+        total_length = res.headers.get('content-length')
+
+        done_event = Event()
+        def handle_sigint(signum, frame):
+            done_event.set()
+        signal.signal(signal.SIGINT, handle_sigint)
+        
         with open(config.installer_path, 'wb') as fw:
-            fw.write(res.content)
+            if total_length is None: # no content length header
+                    fw.write(res.content)
+            else:
+                dl = 0
+                total_length = int(total_length)
+                with Progress() as progress:
+                    download_task = progress.add_task("[green]Downloading...", total=total_length)
+                    for data in res.iter_content(chunk_size=32768):
+                        fw.write(data)
+                        progress.update(download_task, advance=len(data))
+                        if done_event.is_set():
+                            return
+
         console.print("Downloading completed : {}".format(config.installer_path))
 
         console.print("Installing {}...".format(config.installer))

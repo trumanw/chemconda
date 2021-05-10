@@ -10,21 +10,21 @@ class Config(object):
     # Args defined here
     _home_path = os.getenv("CHEMCONDA_HOME_PATH", None)
     # CHEMCONDA_REMOTE_REPO
-    _remote_repo = os.getenv("CHEMCONDA_REMOTE_REPO", "https://repo.anaconda.com/miniconda")
+    remote_repo = os.getenv("CHEMCONDA_REMOTE_REPO", "https://repo.anaconda.com/miniconda")
     # CHEMCONDA_INSTALLER
-    _installer = os.getenv("CHEMCONDA_INSTALLER", "Miniconda3-py39_4.9.2-Linux-x86_64.sh")
+    installer = os.getenv("CHEMCONDA_INSTALLER", "Miniconda3-py39_4.9.2-Linux-x86_64.sh")
     # CHEMCONDA_LOCAL_TMP
-    _download_dir = os.getenv("CHEMCONDA_DOWNLOAD_DIR", "/tmp")
+    download_dir = os.getenv("CHEMCONDA_DOWNLOAD_DIR", "/tmp")
     # CHEMCONDA_INSTALLER_PATH
-    _installer_path = os.getenv("CHEMCONDA_INSTALLER_PATH", os.path.join(_download_dir, _installer))
+    installer_path = os.getenv("CHEMCONDA_INSTALLER_PATH", os.path.join(download_dir, installer))
 
     def args_dict(self) -> dict:
         return {
             "CHEMCONDA_HOME_PATH": self._home_path,
-            "CHEMCONDA_REMOTE_REPO": self._remote_repo,
-            "CHEMCONDA_INSTALLER": self._installer,
-            "CHEMCONDA_DOWNLOAD_DIR": self._download_dir,
-            "CHEMCONDA_INSTALLER_PATH": self._installer_path,
+            "CHEMCONDA_REMOTE_REPO": self.remote_repo,
+            "CHEMCONDA_INSTALLER": self.installer,
+            "CHEMCONDA_DOWNLOAD_DIR": self.download_dir,
+            "CHEMCONDA_INSTALLER_PATH": self.installer_path,
         }
 
     def __new__(cls):

@@ -14,7 +14,7 @@ After installing completed, we can install a new miniconda through the command b
 ```shell
 chemconda setup \
     -d /root/miniconda3 \
-    -v Miniconda3-py39_4.9.2-Linux-x86_64
+    -b Miniconda3-py39_4.9.2-Linux-x86_64.sh
 ```
 
 which the sub-command `setup` accepts a directory path and installs the veresion `Miniconda3-py39_4.9.2-Linux-x86_64` from the [Miniconda](https://repo.anaconda.com/miniconda/) repository website. Also you can change the `-v` to be any other version listed on the repository website.
