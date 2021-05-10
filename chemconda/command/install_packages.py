@@ -46,8 +46,8 @@ def cmd(name, package, channel):
         console.print("CHEMCONDA_HOME_PATH({}) does not exist.".format(conda_bin))
 
     install_packages(
-        package_name=package,
-        env_name=list(name),
+        env_name=name,
+        package_names=list(package),
         add_channels=list(channel),
         config=config,
         console=console)

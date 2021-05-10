@@ -1,6 +1,4 @@
 import io
-import os
-import requests
 
 import click
 from rich.console import Console

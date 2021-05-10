@@ -1,4 +1,5 @@
 import os
+import requests
 import subprocess
 
 from rich.console import Console
@@ -18,7 +19,7 @@ def exec_subprocess(cmd, is_split=False):
     if err:
         raise(Exception(err.decode()))
 
-def install_packages(package_names, env_name, add_channels=None, config=None, console=None):
+def install_packages(env_name, package_names, add_channels=None, config=None, console=None):
 
     if not config:
         config = Config()
@@ -111,23 +112,23 @@ def install_new_kernel(env_name, python_ver, new_kernel, new_condarc, config=Non
             fw.write(condarc_raw)
     
     # create a new conda env if it does not exist
-    if not os.path.exists(os.path.join(config.home_path, 'envs/{}'.format(name))):
+    if not os.path.exists(os.path.join(config.home_path, 'envs/{}'.format(env_name))):
         # create a new conda env
         os.system("{} create -n {} python={} -y".format(
             conda_bin, 
-            name, 
+            env_name, 
             python_ver))
 
         # install necessary packages to the new conda env
-        os.system("{} install --name {} ipython ipykernel -y".format(conda_bin, name))
+        os.system("{} install --name {} ipython ipykernel -y".format(conda_bin, env_name))
     
     # add conda env as a new kernel
     if new_kernel:
-        ipython_bin = os.path.join(config.home_path, "envs/{}/bin/ipython".format(name))
+        ipython_bin = os.path.join(config.home_path, "envs/{}/bin/ipython".format(env_name))
         if not os.path.exists(ipython_bin):
-            os.system("{} install --name {} ipython ipykernel -y".format(conda_bin, name))
+            os.system("{} install --name {} ipython ipykernel -y".format(conda_bin, env_name))
         
-        os.system('{} kernel install --name "{}" --user'.format(ipython_bin, name))
+        os.system('{} kernel install --name "{}" --user'.format(ipython_bin, env_name))
 
     # additional sidecar packages for Jupyter Notebook/Lab users
     install_packages(
