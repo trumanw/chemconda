@@ -1,4 +1,8 @@
+import os
+import yaml
 from rich.console import Console
+
+CONFIG_FILE = os.path.expanduser('~/.config/chemconda/config.yaml')
 
 class Config(object):
     _instance = None
@@ -16,6 +20,16 @@ class Config(object):
 
     def __new__(cls):
         if cls._instance is None:
-            cls.console.print('Creating the object')
             cls._instance = super(Config, cls).__new__(cls)
+            # load config file and overwrite ENV VARS
+            if os.path.exists(CONFIG_FILE):
+                with open(CONFIG_FILE, 'r') as stream:
+                    try:
+                        _config_cache = yaml.safe_load(stream)
+                    except yaml.YAMLError as exc:
+                        raise exc
+
+                # load CHEMCONDA_HOME_PATH from config file
+                cls.home_path = cls.home_path if 'CHEMCONDA_HOME_PATH' not in _config_cache else _config_cache['CHEMCONDA_HOME_PATH']
+
         return cls._instance

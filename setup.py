@@ -5,6 +5,7 @@ install_requires = [
   'requests',
   'Click',
   'rich',
+  'PyYAML',
 ]
 
 setup(

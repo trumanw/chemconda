@@ -1,7 +1,12 @@
 import io
+import os
+import requests
 
 import click
 from rich.console import Console
+
+from ..config import Config
+from ..utils import install_conda_env
 
 class RichHelpCommand(click.Command):
     def format_help(self, ctx, formatter):
@@ -18,14 +23,18 @@ class RichHelpCommand(click.Command):
         console.print(example_source_code, style="bold yellow")
         formatter.write(sio.getvalue())
         
-
 @click.command(cls=RichHelpCommand)
-@click.option("-d", required=True, prompt=True, type=str, 
+@click.option("-d", "--des", required=True, prompt=True, type=str, 
     help="destination path of installing miniconda.")
-@click.option("-v", required=False, prompt=True, type=str,
+@click.option("-v", "--ver", required=False, prompt=False, type=str,
     default="Miniconda3-py39_4.9.2-Linux-x86_64",
     help="the name of the remote miniconda package to be installed.")
-def cmd():
+def cmd(des, ver):
     """Install a new conda with a specific CHEMCONDA_HOME_PATH.
     """
-    pass
+    # console init 
+    console = Console()
+    # load config singleton    
+    config = Config()
+
+    install_conda_env(des, ver, config=config, console=console)
