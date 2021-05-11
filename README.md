@@ -94,5 +94,4 @@ There are several pre-config environment variables which could control the actio
 ```
 
 ## Coming features:
-- Rich command line interface.
 - Dotenv with better usage of ENV VAR loading.
