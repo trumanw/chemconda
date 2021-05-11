@@ -140,9 +140,7 @@ def install_new_kernel(env_name, python_ver, new_kernel, new_condarc, config=Non
         condarc_raw = """channels:
   - conda-forge
   - salilab
-  - omnia
   - pytorch
-  - anaconda
   - defaults
 """
         with open(os.path.expanduser("~/.condarc"), 'w') as fw:
