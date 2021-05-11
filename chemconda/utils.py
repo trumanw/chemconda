@@ -145,7 +145,7 @@ def install_new_kernel(env_name, python_ver, new_kernel, new_condarc, config=Non
   - anaconda
   - defaults
 """
-        with open("~/.condarc", 'w') as fw:
+        with open(os.path.expanduser("~/.condarc"), 'w') as fw:
             fw.write(condarc_raw)
     
     # create a new conda env if it does not exist
