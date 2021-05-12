@@ -123,6 +123,43 @@ def install_conda_env(destination, binary=None, config=None, console=None):
     # show the installed Minconda3 home path
     console.print("Setup completed: conda installed at {}".format(config.home_path), style="bold white")
 
+def remove_kernel(env_name, config=None, console=None):
+
+    if not config:
+        config = Config()
+    
+    if not console:
+        console = Console()
+
+    if not os.path.exists(config.home_path):
+        console.print("CHEMCONDA_HOME_PATH cannot be empty.")
+
+    conda_bin = os.path.join(config.home_path, "bin/conda")
+    if not os.path.exists(conda_bin):
+        console.print("CHEMCONDA_HOME_PATH({}) does not exist.".format(conda_bin))
+
+    # check if the ipykernel exists
+    kernels_output =  exec_subprocess("jupyter kernelspec list")
+    kernels_dict = {}
+    for k_l in kernels_output.split('\n')[1:-1]:
+        k_l_slice = k_l.split()
+        # which 0th is the name of the kernel, and 1st is the location
+        kernels_dict[k_l_slice[0]] = k_l_slice[1]
+    
+    #TODO: logger.info
+    console.print("detected kernels : ", kernels_dict)
+        
+    if env_name in kernels_dict:
+        kernel_removed_output = exec_subprocess("jupyter kernelspec remove {} -f".format(env_name))
+    console.print(kernel_removed_output)
+    
+    # check if the env exists
+    if os.path.exists(os.path.join(config.home_path, "envs/{}".format(env_name))):
+        env_removed_output = exec_subprocess("{} remove -n {} --all -y".format(conda_bin, env_name))
+    
+    #TODO: logger.info
+    console.print(env_removed_output)
+
 def install_new_kernel(env_name, python_ver, new_kernel, new_condarc, config=None, console=None):
 
     if not config:
