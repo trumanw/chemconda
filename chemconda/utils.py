@@ -30,7 +30,7 @@ def rich_exec_subprocess(cmd):
             break
         yield line
 
-def install_packages(env_name, package_names, add_channels=None, config=None, console=None):
+def install_packages(env_name, package_names, fast_mode=False, add_channels=None, config=None, console=None):
 
     if not config:
         config = Config()
@@ -40,7 +40,10 @@ def install_packages(env_name, package_names, add_channels=None, config=None, co
     
     console.print("Start installing packages...")
     # install necessary packages in the new conda
-    new_conda_bin = os.path.join(config.home_path, "bin/conda")
+    if fast_mode:
+        new_conda_bin = os.path.join(config.home_path, "bin/mamba")
+    else:
+        new_conda_bin = os.path.join(config.home_path, "bin/conda")
     
     if not isinstance(package_names, list):
         raise Exception("package_names shoud be a list")
@@ -167,7 +170,7 @@ def install_new_kernel(env_name, python_ver, new_kernel, new_condarc, config=Non
 
     # additional sidecar packages for Jupyter Notebook/Lab users
     install_packages(
-        package_names=['jedi=0.18'], 
+        package_names=['jedi=0.18', 'mamba'], 
         env_name=env_name, 
         add_channels=['conda-forge'],
         config=config,
