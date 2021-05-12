@@ -120,6 +120,16 @@ def install_conda_env(destination, binary=None, config=None, console=None):
             os.system("bash {} -b -p {}".format(config.installer_path, config.home_path))
         console.print("Installing completed.")
 
+    console.print("Start installing base dependencies...")
+    # install sidecar in the base env
+    install_packages(
+        package_names=['jedi=0.18', 'mamba'], 
+        env_name='base', 
+        add_channels=['conda-forge'],
+        config=config,
+        console=console)
+    console.print("Installing completed.")
+
     # show the installed Minconda3 home path
     console.print("Setup completed: conda installed at {}".format(config.home_path), style="bold white")
 
@@ -205,6 +215,7 @@ def install_new_kernel(env_name, python_ver, new_kernel, new_condarc, config=Non
         
         os.system('{} kernel install --name "{}" --user'.format(ipython_bin, env_name))
 
+    console.print("Start installing base dependencies in the {}...".format(env_name))
     # additional sidecar packages for Jupyter Notebook/Lab users
     install_packages(
         package_names=['jedi=0.18', 'mamba'], 
@@ -214,3 +225,4 @@ def install_new_kernel(env_name, python_ver, new_kernel, new_condarc, config=Non
         console=console)
     # to overwrite the jedi=0.17 installed in the jupyter lab(if existed)
     # ...
+    console.print("Setup completed.")
