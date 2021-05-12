@@ -5,7 +5,8 @@ from chemconda import __version__
 from chemconda.command import install_conda, \
     new_kernel, \
     install_packages, \
-    show_info
+    show_info, \
+    rm_kernel
 
 @click.group()
 @click.version_option(__version__, "--version")
@@ -23,3 +24,4 @@ cli.add_command(install_conda.cmd, "setup")
 cli.add_command(show_info.cmd, "info")
 cli.add_command(new_kernel.cmd, "new")
 cli.add_command(install_packages.cmd, "add")
+cli.add_command(rm_kernel.cmd, "rm")
