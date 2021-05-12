@@ -27,9 +27,11 @@ class RichHelpCommand(click.Command):
     help="the name of the conda env to be updated.")
 @click.option("-p", "--package", required=True, prompt=True, type=str, multiple=True,
     help="the conda package name.")
-@click.option("-c", "--channel", required=False, prompt=True, type=str, multiple=True,
+@click.option("-c", "--channel", required=False, prompt=False, type=str, multiple=True,
     help="the conda channel name.")
-def cmd(name, package, channel):
+@click.option("--fast", is_flag=True, prompt=False, 
+    help="using mamba(faster than conda) to install")
+def cmd(name, package, channel, fast):
     """Install conda packages to the environment.
     """
     
@@ -44,10 +46,11 @@ def cmd(name, package, channel):
     conda_bin = os.path.join(config.home_path, "bin/conda")
     if not os.path.exists(conda_bin):
         console.print("CHEMCONDA_HOME_PATH({}) does not exist.".format(conda_bin))
-
+        
     install_packages(
         env_name=name,
         package_names=list(package),
         add_channels=list(channel),
+        fast_mode=fast,
         config=config,
         console=console)
