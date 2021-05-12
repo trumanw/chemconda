@@ -77,6 +77,14 @@ In case, you can also list all the current available kernels to ensure the `aidd
 jupyter kernelspec list
 ```
 
+### 5. Remove conda kernel
+
+Remove conda env from Jupyter kernelspec list:
+
+```shell
+chemconda rm -n env_name
+```
+
 ## Environment variables as settings
 
 There are several pre-config environment variables which could control the actions of the conda environment setup:
