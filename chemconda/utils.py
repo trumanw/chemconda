@@ -1,4 +1,5 @@
 import os
+import json
 import signal
 import requests
 import subprocess
@@ -214,6 +215,24 @@ def install_new_kernel(env_name, python_ver, new_kernel, new_condarc, config=Non
             os.system("{} install --name {} ipython ipykernel -y".format(conda_bin, env_name))
         
         os.system('{} kernel install --name "{}" --user'.format(ipython_bin, env_name))
+
+        # add env args in the kernel.json
+        kernel_file = os.path.join(
+            os.path.expanduser("~/.local/share/jupyter/kernels"), "{}/kernel.json".format(env_name))
+        if os.path.isfile(kernel_file):
+            # processing update env
+            with open(kernel_file) as f:
+                kernel_dict = json.load(f)
+            if 'env' not in kernel_dict:
+                kernel_dict['env'] = {}
+            env_bin_dir = os.path.join(config.home_path, "envs/{}/bin".format(env_name))
+            kernel_dict['env']['PATH'] = os.environ['PATH']+":{}".format(env_bin_dir)
+
+            with open(kernel_file, 'w') as fw:
+                json.dump(kernel_dict, fw)
+
+        else:
+            raise Exception("failed to create a kernelspec in the jupyter.")
 
     console.print("Start installing base dependencies in the {}...".format(env_name))
     # additional sidecar packages for Jupyter Notebook/Lab users
