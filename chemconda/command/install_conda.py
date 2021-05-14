@@ -1,6 +1,7 @@
 import io
 
 import click
+from click.termui import prompt
 from rich.console import Console
 
 from ..config import Config
@@ -35,4 +36,4 @@ def cmd(destination, binary):
     # load config singleton    
     config = Config()
 
-    install_conda_env(destination, binary, config=config, console=console)
+    install_conda_env(destination, binary, auto_add_kernels=True, config=config, console=console)
