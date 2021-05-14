@@ -4,6 +4,7 @@ import signal
 import requests
 import subprocess
 from threading import Event
+from glob import glob
 
 from rich.console import Console
 from rich.progress import Progress
@@ -62,7 +63,7 @@ def install_packages(env_name, package_names, fast_mode=False, add_channels=None
     # [console.print(line) for line in rich_exec_subprocess(pkg_install_cmd)]
         
 
-def install_conda_env(destination, binary=None, config=None, console=None):
+def install_conda_env(destination, binary=None, auto_add_kernels=True, config=None, console=None):
 
     if not config:
         config = Config()
@@ -121,18 +122,27 @@ def install_conda_env(destination, binary=None, config=None, console=None):
             os.system("bash {} -b -p {}".format(config.installer_path, config.home_path))
         console.print("Installing completed.")
 
-    console.print("Start installing base dependencies...")
-    # install sidecar in the base env
-    install_packages(
-        package_names=['jedi=0.18', 'mamba'], 
-        env_name='base', 
-        add_channels=['conda-forge'],
-        config=config,
-        console=console)
-    console.print("Installing completed.")
+        console.print("Start installing base dependencies...")
+        # install sidecar in the base env
+        install_packages(
+            package_names=['jedi=0.18', 'mamba'], 
+            env_name='base', 
+            add_channels=['conda-forge'],
+            config=config,
+            console=console)
+        console.print("Installing completed.")
 
-    # show the installed Minconda3 home path
-    console.print("Setup completed: conda installed at {}".format(config.home_path), style="bold white")
+        # show the installed Minconda3 home path
+        console.print("Setup completed: conda installed at {}".format(config.home_path), style="bold white")
+    else:
+        if auto_add_kernels:
+            # search the config.home_path/envs/ folder to get all the potential kernels.
+            env_names = [os.path.basename(dirpath) for dirpath in glob(os.path.join(config.home_path, 'envs/*'))]
+            console.print("Found {} kernels, start to restore...".format(len(env_names)))
+            for env_name in env_names:
+                console.print("Adding kernel {}".format(env_name))
+                add_existed_kernel(env_name, config=config, console=console)
+            console.print("All kernels have been added.")
 
 def remove_kernel(env_name, config=None, console=None):
 
@@ -208,40 +218,58 @@ def install_new_kernel(env_name, python_ver, new_kernel, new_condarc, config=Non
         # install necessary packages to the new conda env
         os.system("{} install --name {} ipython ipykernel -y".format(conda_bin, env_name))
     
+        console.print("Start installing base dependencies in the {}...".format(env_name))
+        # additional sidecar packages for Jupyter Notebook/Lab users
+        install_packages(
+            package_names=['jedi=0.18', 'mamba'], 
+            env_name=env_name, 
+            add_channels=['conda-forge'],
+            config=config,
+            console=console)
+
     # add conda env as a new kernel
     if new_kernel:
-        ipython_bin = os.path.join(config.home_path, "envs/{}/bin/ipython".format(env_name))
-        if not os.path.exists(ipython_bin):
-            os.system("{} install --name {} ipython ipykernel -y".format(conda_bin, env_name))
-        
-        os.system('{} kernel install --name "{}" --user'.format(ipython_bin, env_name))
+        console.print("Start adding kernel {} to jupyter kernelspec list...".format(env_name))
+        add_existed_kernel(env_name, config=config, console=console)
+        console.print("Kernel {} added.".format(env_name))
 
-        # add env args in the kernel.json
-        kernel_file = os.path.join(
-            os.path.expanduser("~/.local/share/jupyter/kernels"), "{}/kernel.json".format(env_name))
-        if os.path.isfile(kernel_file):
-            # processing update env
-            with open(kernel_file) as f:
-                kernel_dict = json.load(f)
-            if 'env' not in kernel_dict:
-                kernel_dict['env'] = {}
-            env_bin_dir = os.path.join(config.home_path, "envs/{}/bin".format(env_name))
-            kernel_dict['env']['PATH'] = os.environ['PATH']+":{}".format(env_bin_dir)
-
-            with open(kernel_file, 'w') as fw:
-                json.dump(kernel_dict, fw)
-
-        else:
-            raise Exception("failed to create a kernelspec in the jupyter.")
-
-    console.print("Start installing base dependencies in the {}...".format(env_name))
-    # additional sidecar packages for Jupyter Notebook/Lab users
-    install_packages(
-        package_names=['jedi=0.18', 'mamba'], 
-        env_name=env_name, 
-        add_channels=['conda-forge'],
-        config=config,
-        console=console)
-    # to overwrite the jedi=0.17 installed in the jupyter lab(if existed)
-    # ...
     console.print("Setup completed.")
+
+def add_existed_kernel(env_name, config=None, console=None):
+
+    if not config:
+        config = Config()
+
+    if not console:
+        console = Console()
+
+    if not os.path.exists(config.home_path):
+        console.print("CHEMCONDA_HOME_PATH cannot be empty.")
+
+    conda_bin = os.path.join(config.home_path, "bin/conda")
+    if not os.path.exists(conda_bin):
+        console.print("CHEMCONDA_HOME_PATH({}) does not exist.".format(conda_bin))
+
+    ipython_bin = os.path.join(config.home_path, "envs/{}/bin/ipython".format(env_name))
+    if not os.path.exists(ipython_bin):
+        os.system("{} install --name {} ipython ipykernel -y".format(conda_bin, env_name))
+    
+    os.system('{} kernel install --name "{}" --user'.format(ipython_bin, env_name))
+
+    # add env args in the kernel.json
+    kernel_file = os.path.join(
+        os.path.expanduser("~/.local/share/jupyter/kernels"), "{}/kernel.json".format(env_name))
+    if os.path.isfile(kernel_file):
+        # processing update env
+        with open(kernel_file) as f:
+            kernel_dict = json.load(f)
+        if 'env' not in kernel_dict:
+            kernel_dict['env'] = {}
+        env_bin_dir = os.path.join(config.home_path, "envs/{}/bin".format(env_name))
+        kernel_dict['env']['PATH'] = os.environ['PATH']+":{}".format(env_bin_dir)
+
+        with open(kernel_file, 'w') as fw:
+            json.dump(kernel_dict, fw)
+
+    else:
+        raise Exception("failed to create a kernelspec in the jupyter.")
