@@ -158,12 +158,13 @@ def remove_kernel(env_name, config=None, console=None):
     if not console:
         console = Console()
 
-    if not os.path.exists(config.home_path):
-        console.print("CHEMCONDA_HOME_PATH cannot be empty.")
-
-    conda_bin = os.path.join(config.home_path, "bin/conda")
-    if not os.path.exists(conda_bin):
-        console.print("CHEMCONDA_HOME_PATH({}) does not exist.".format(conda_bin))
+    conda_bin = 'bin/conda'
+    if not config.home_path:
+        console.print("CHEMCONDA_HOME_PATH has not been set.")
+    else:
+        conda_bin = os.path.join(config.home_path, "bin/conda")
+        if not os.path.exists(conda_bin):
+            console.print("CHEMCONDA_HOME_PATH({}) does not have any conda envs.".format(conda_bin))
 
     # check if the ipykernel exists
     kernels_output =  exec_subprocess("jupyter kernelspec list")
@@ -195,12 +196,13 @@ def install_new_kernel(env_name, python_ver, new_kernel, new_condarc, config=Non
     if not console:
         console = Console()
 
+    conda_bin = 'bin/conda'
     if not os.path.exists(config.home_path):
-        console.print("CHEMCONDA_HOME_PATH cannot be empty.")
-
-    conda_bin = os.path.join(config.home_path, "bin/conda")
-    if not os.path.exists(conda_bin):
-        console.print("CHEMCONDA_HOME_PATH({}) does not exist.".format(conda_bin))
+        console.print("CHEMCONDA_HOME_PATH does not exist.")
+    else:
+        conda_bin = os.path.join(config.home_path, "bin/conda")
+        if not os.path.exists(conda_bin):
+            console.print("CHEMCONDA_HOME_PATH({}) does not have any conda envs.".format(conda_bin))
 
     # update ~/.condarc file if is_override channels
     if new_condarc:
@@ -248,13 +250,6 @@ def add_existed_kernel(env_name, config=None, console=None):
 
     if not console:
         console = Console()
-
-    if not os.path.exists(config.home_path):
-        console.print("CHEMCONDA_HOME_PATH cannot be empty.")
-
-    conda_bin = os.path.join(config.home_path, "bin/conda")
-    if not os.path.exists(conda_bin):
-        console.print("CHEMCONDA_HOME_PATH({}) does not exist.".format(conda_bin))
 
     ipython_bin = os.path.join(config.home_path, "envs/{}/bin/ipython".format(env_name))
     if not os.path.exists(ipython_bin):
@@ -384,9 +379,6 @@ def show_info(envs, config=None, console=None):
 
     if not console:
         console = Console()
-
-    if not os.path.exists(config.home_path):
-        console.print("CHEMCONDA_HOME_PATH cannot be empty.")
 
     if envs:
         # list all the available envs under the CHEMCONDA_HOME_PATH
