@@ -40,12 +40,15 @@ def cmd(name, package, channel, fast):
     # load config
     config = Config()
 
-    if not os.path.exists(config.home_path):
-        console.print("CHEMCONDA_HOME_PATH cannot be empty.")
-
-    conda_bin = os.path.join(config.home_path, "bin/conda")
-    if not os.path.exists(conda_bin):
-        console.print("CHEMCONDA_HOME_PATH({}) does not exist.".format(conda_bin))
+    if not config.home_path:
+        console.print("CHEMCONDA_HOME_PATH has not been set.")
+    else:
+        if not os.path.exists(config.home_path):
+            console.print("CHEMCONDA_HOME_PATH does not exist.")
+        else:
+            conda_bin = os.path.join(config.home_path, "bin/conda")
+            if not os.path.exists(conda_bin):
+                console.print("CHEMCONDA_HOME_PATH({}) does not have any conda envs.".format(conda_bin))
         
     install_packages(
         env_name=name,

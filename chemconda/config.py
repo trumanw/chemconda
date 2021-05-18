@@ -17,6 +17,9 @@ class Config(object):
     download_dir = os.getenv("CHEMCONDA_DOWNLOAD_DIR", "/tmp")
     # CHEMCONDA_INSTALLER_PATH
     installer_path = os.getenv("CHEMCONDA_INSTALLER_PATH", os.path.join(download_dir, installer))
+    # AWS CONFIG
+    aws_profile = os.getenv("CHEMCONDA_AWS_PROFILE", "chemconda")
+    aws_s3_bucket = os.getenv("CHEMCONDA_AWS_S3_BUCKET", "handb-chemconda-alpha")
 
     def args_dict(self) -> dict:
         return {

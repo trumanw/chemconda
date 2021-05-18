@@ -97,7 +97,31 @@ Remove conda env from Jupyter kernelspec list:
 chemconda rm -n env_name
 ```
 
-### 7. New a conda env from environment.yaml (from chemconda templates library)
+### 7. Remote chemconda repository on AWS S3:
+
+You can quickly setup a bucket as a chemconda repo, tar your whole miniconda3 folder into a tar.gz package and upload a specific S3 bucket. Then using the sub-cmd below to see the remote available miniconda environments:
+
+```shell
+chemconda show --envs -r
+```
+which the `-r` means the `-remote`, you can also use the same cmd without `-r` to check the added local miniconda envs.
+
+Next, you can also pull, extract and build a new Miniconda3 environment ready for Jupyter kernels through the sub-cmd below:
+
+```shell
+chemconda pull -d /root -s miniconda3-v0.0.tar.gz
+```
+
+while, the sub-cmd would download the `miniconda3-v0.0.tar.gz` from remote repo and setup a Miniconda3 to the path `/root/miniconda3`. You can also see the kernels of the miniconda envs appeared in the jupyter kernelspecs.
+
+*NOTICE*
+You should take care of setting the AWS credential and AWS S3 by yourself, for more details please check:
+- AWS Credential: [Configuration and credential file settings](https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-files.html)
+- AWS S3: [Amazon S3 mainpage](https://aws.amazon.com/s3/)
+
+The credential usage is prefered to be picked by AWS_PROFILE, which could be set by ENV VAR `CHEMCONDA_AWS_PROFILE` or inside ~/.config/chemconda/config.yaml. Also, you can specify the AWS Bucket through ENV VAR `CHEMCONDA_AWS_S3_BUCKET` or in the ~/.config/chemconda/config.yaml file.
+
+### 7. (Upcoming) New a conda env from environment.yaml (from chemconda templates library)
 
 `chemconda` has created and tested various of conda templates under the `./template` directory. The manifest of the templates are listed below:
 
@@ -115,6 +139,8 @@ There are several pre-config environment variables which could control the actio
 #       default: https://repo.anaconda.com/miniconda'
 # - CHEMCONDA_DOWNLOAD_DIR: the local directory used for keeping downloading installer,
 #       default: /tmp
+# - CHEMCONDA_AWS_PROFILE: the AWS credential profile to access to the remote repository on AWS S3.
+# - CHEMCONDA_AWS_S3_BUCKET: the AWS S3 bucket used for keeping packed Miniconda3 as a remote repo.
 ```
 
 ## Coming features:

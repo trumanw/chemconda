@@ -5,14 +5,14 @@ from click.termui import prompt
 from rich.console import Console
 
 from ..config import Config
-from ..utils import import_conda_env
+from ..utils import fetch_conda_env
 
 class RichHelpCommand(click.Command):
     def format_help(self, ctx, formatter):
         super().format_help(ctx, formatter)
 
         example_source_code = """
-    chemconda setup -d /root/miniconda3 -v Miniconda3-py39_4.9.2-Linux-x86_64.sh
+    chemconda pull -d /root -s miniconda3-v0.0.tar.gz
         """
 
         # customize the output
@@ -29,11 +29,11 @@ class RichHelpCommand(click.Command):
     default="Miniconda3-py39_4.9.2-Linux-x86_64.sh",
     help="the name of the remote miniconda package to be installed.")
 def cmd(dst, src):
-    """Import a new conda with a specific CHEMCONDA_HOME_PATH.
+    """Fetch a new conda env from the remote repository and setup CHEMCONDA_HOME_PATH.
     """
     # console init 
     console = Console()
     # load config singleton    
     config = Config()
 
-    import_conda_env(dst, src, auto_add_kernels=True, config=config, console=console)
+    fetch_conda_env(dst, src, auto_add_kernels=True, config=config, console=console)

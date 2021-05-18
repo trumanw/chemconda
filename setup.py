@@ -6,6 +6,7 @@ install_requires = [
   'Click',
   'rich',
   'PyYAML',
+  'boto3',
 ]
 
 setup(
