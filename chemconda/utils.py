@@ -4,6 +4,7 @@ import shutil
 import signal
 import requests
 import subprocess
+import tarfile
 from threading import Event
 from glob import glob
 
@@ -396,3 +397,57 @@ def show_info(envs, config=None, console=None):
     else:
         console.print("Local configuration in ~/.config/chemconda/config.yaml: ")
         console.print(config.args_dict())
+
+def fetch_conda_env(dst, src, auto_add_kernels=True, config=None, console=None):
+    # expand user path to abspath
+    dst = os.path.expanduser(dst)
+    src = os.path.expanduser(src)
+
+    if not config:
+        config = Config()
+
+    if not console:
+        console = Console()
+
+    if os.path.exists(dst):
+        console.print("CHEMCONDA_HOME_PATH {} has already existed.".format(config.home_path))
+    
+    # download and decompress to config.download_dir
+    aws_profile = config.aws_profile
+    remote_bucket = config.aws_s3_bucket
+
+    boto3.setup_default_session(profile_name=aws_profile)
+    s3 = boto3.client('s3')
+
+    # try-to-download packaged file
+    download_filepath = os.path.join(config.download_dir, src)
+    with open(download_filepath, 'wb') as data:
+        try:
+            s3.download_fileobj(remote_bucket, src, data)
+        except Exception as exc:
+            raise(exc)
+    
+    # untar the package to dst path
+    tar = tarfile.open(download_filepath)
+    tar.extractall(path=dst)
+    tar.close()
+
+    # add kernels
+    if auto_add_kernels:
+        # search the config.home_path/envs/ folder to get all the potential kernels.
+        env_names = [os.path.basename(dirpath) for dirpath in glob(os.path.join(dst, 'envs/*'))]
+        console.print("Found {} kernels, start to restore...".format(len(env_names)))
+        for env_name in env_names:
+            console.print("Adding kernel {}".format(env_name))
+            add_existed_kernel(env_name, config=config, console=console)
+        console.print("All kernels have been added.")
+
+    # update config.home_path
+    if not config.home_path:
+        # overwrite the CHEMCONDA_HOME_PATH in the ~/.chemconda/config.yaml file
+        config.home_path = dst
+        config.installer = None
+    else:
+        if config.home_path != os.path.abspath(os.path.expanduser(dst)):
+            # overwrite the CHEMCONDA_HOME_PATH in the ~/.chemconda/config.yaml file
+            config.home_path = dst

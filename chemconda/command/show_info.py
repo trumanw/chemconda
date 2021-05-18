@@ -1,5 +1,5 @@
 import io
-
+import os
 import click
 from rich.console import Console
 
@@ -32,12 +32,18 @@ class RichHelpCommand(click.Command):
 def cmd(envs, remote):
     """Print help info on the terminal screen.
     """
-    example_source_code = """
-    chemconda info
-        """
-    console = Console(force_terminal=True)
-    console.print("\n[bold]Example: ", style="white")
-    console.print(example_source_code, style="bold yellow")
+
+    # console init
+    console = Console()
+    # load config
+    config = Config()
+
+    if not os.path.exists(config.home_path):
+        console.print("CHEMCONDA_HOME_PATH cannot be empty.")
+
+    conda_bin = os.path.join(config.home_path, "bin/conda")
+    if not os.path.exists(conda_bin):
+        console.print("CHEMCONDA_HOME_PATH({}) does not exist.".format(conda_bin))
 
     if remote:
         # show remote info 
