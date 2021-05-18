@@ -6,7 +6,8 @@ from chemconda.command import import_conda, install_conda, \
     new_kernel, \
     install_packages, \
     show_info, \
-    rm_kernel
+    rm_kernel, \
+    fetch_conda
 
 @click.group()
 @click.version_option(__version__, "--version")
@@ -26,3 +27,4 @@ cli.add_command(new_kernel.cmd, "new")
 cli.add_command(install_packages.cmd, "add")
 cli.add_command(rm_kernel.cmd, "rm")
 cli.add_command(import_conda.cmd, "imp")
+cli.add_command(fetch_conda.cmd, "pull")
