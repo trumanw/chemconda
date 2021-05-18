@@ -36,7 +36,19 @@ chemconda new -n aidd
 
 The sub-commmand `new` accepts one name after `-n` and create a new conda env under the `[CHEMCONDA_HOME_PATH]\env` path.
 
-### 3. Install Python package to the specific conda env
+### 3. Import a existed conda env.
+
+Sometimes we can create and setup an initialized conda env on a NAS-like hardware driver once. So that others can simply import the initializesd conda env directly from hardware driver through:
+
+```shell
+chemconda imp -s /path-to-nas/miniconda3 -d /root/miniconda3
+```
+
+The command above would do two things:
+- copy-and-paste the whole directory from `-d` to `-s` path, if `-d` is a valid conda env root directory.
+- scann the `./envs/` path under the `-d` directory, and automatically add found kernels to the jupyter kernelspec list.
+
+### 4. Install Python package to the specific conda env
 
 Before install any Python package, please make sure again the `CHEMCONDA_HOME_PATH` is correctly set:
 
@@ -60,7 +72,7 @@ which the statement equals the command below:
 conda install rdkit numpy --name env_name -c conda-forge -y
 ```
 
-### 4. Restore conda kernel
+### 5. Restore conda kernel
 
 Given the situation of the whole instance on Cloud is recovered and restarted with mountable HD driver, we can move the rootpath of miniconda installed on the moutable HD driver and run the lines below to re-add the conda env to the Jupyter kernelspec list:
 
@@ -77,13 +89,17 @@ In case, you can also list all the current available kernels to ensure the `aidd
 jupyter kernelspec list
 ```
 
-### 5. Remove conda kernel
+### 6. Remove conda kernel
 
 Remove conda env from Jupyter kernelspec list:
 
 ```shell
 chemconda rm -n env_name
 ```
+
+### 7. New a conda env from environment.yaml (from chemconda templates library)
+
+`chemconda` has created and tested various of conda templates under the `./template` directory. The manifest of the templates are listed below:
 
 ## Environment variables as settings
 

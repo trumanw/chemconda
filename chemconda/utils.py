@@ -1,5 +1,6 @@
 import os
 import json
+import shutil
 import signal
 import requests
 import subprocess
@@ -65,6 +66,8 @@ def install_packages(env_name, package_names, fast_mode=False, add_channels=None
 
 def install_conda_env(destination, binary=None, auto_add_kernels=True, config=None, console=None):
 
+    destination = os.path.expanduser(destination)
+
     if not config:
         config = Config()
 
@@ -72,13 +75,13 @@ def install_conda_env(destination, binary=None, auto_add_kernels=True, config=No
         console = Console()
 
     console.print("Update config...")
-    des_abspath = os.path.abspath(os.path.expanduser(destination))
+    des_abspath = os.path.abspath(destination)
     if not config.home_path:
         # overwrite the CHEMCONDA_HOME_PATH in the ~/.chemconda/config.yaml file
         config.home_path = des_abspath
         config.installer = binary
     else:
-        if config.home_path != os.path.abspath(os.path.expanduser(destination)):
+        if config.home_path != os.path.abspath(destination):
             # overwrite the CHEMCONDA_HOME_PATH in the ~/.chemconda/config.yaml file
             config.home_path = des_abspath
 
@@ -273,3 +276,49 @@ def add_existed_kernel(env_name, config=None, console=None):
 
     else:
         raise Exception("failed to create a kernelspec in the jupyter.")
+
+def import_conda_env(dst, src, auto_add_kernels=True, config=None, console=None):
+
+    # expand user path to abspath
+    dst = os.path.expanduser(dst)
+    src = os.path.expanduser(src)
+
+    if not config:
+        config = Config()
+
+    if not console:
+        console = Console()
+
+    if os.path.exists(dst):
+        console.print("CHEMCONDA_HOME_PATH {} has already existed.".format(config.home_path))
+
+    # conda_bin = os.path.join(config.home_path, "bin/conda")
+    # if not os.path.exists(conda_bin):
+        # console.print("CHEMCONDA_HOME_PATH({}) does not exist.".format(conda_bin))
+
+    dst_conda_bin = os.path.join(src, "bin/conda") 
+    if not os.path.exists(dst_conda_bin):
+        console.print("Input dst path {} missing bin/conda under its root directory".format(src))
+
+    # move the dst conda env to config.home_path
+    dst_copied = shutil.copytree(src, dst)
+
+    # add kernels
+    if auto_add_kernels:
+        # search the config.home_path/envs/ folder to get all the potential kernels.
+        env_names = [os.path.basename(dirpath) for dirpath in glob(os.path.join(dst_copied, 'envs/*'))]
+        console.print("Found {} kernels, start to restore...".format(len(env_names)))
+        for env_name in env_names:
+            console.print("Adding kernel {}".format(env_name))
+            add_existed_kernel(env_name, config=config, console=console)
+        console.print("All kernels have been added.")
+
+    # update config.home_path
+    if not config.home_path:
+        # overwrite the CHEMCONDA_HOME_PATH in the ~/.chemconda/config.yaml file
+        config.home_path = dst_copied
+        config.installer = None
+    else:
+        if config.home_path != os.path.abspath(os.path.expanduser(dst_copied)):
+            # overwrite the CHEMCONDA_HOME_PATH in the ~/.chemconda/config.yaml file
+            config.home_path = dst_copied
