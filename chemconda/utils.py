@@ -7,8 +7,10 @@ import subprocess
 from threading import Event
 from glob import glob
 
+import boto3
 from rich.console import Console
 from rich.progress import Progress
+from rich.table import Table
 
 from .config import Config
 
@@ -322,3 +324,75 @@ def import_conda_env(dst, src, auto_add_kernels=True, config=None, console=None)
         if config.home_path != os.path.abspath(os.path.expanduser(dst_copied)):
             # overwrite the CHEMCONDA_HOME_PATH in the ~/.chemconda/config.yaml file
             config.home_path = dst_copied
+
+def show_remote_info(envs, config=None, console=None):
+
+    if not config:
+        config = Config()
+
+    if not console:
+        console = Console()
+
+    aws_profile = config.aws_profile
+    remote_bucket = config.aws_s3_bucket
+    
+    if envs:
+        # list all the available envs
+        boto3.setup_default_session(profile_name=aws_profile)
+        s3 = boto3.client('s3')
+        
+        objects_dict = dict()
+        list_objects_resp = s3.list_objects_v2(Bucket=remote_bucket)
+        if 'Contents' in list_objects_resp:
+            table = Table(show_header=True, header_style="bold magenta")
+            table.add_column("Key", style='dim')
+            table.add_column("LastModified", style="dim", width=12)
+            table.add_column("Size(MB)", justify="right")
+            table.add_column("StorageClass", justify="right")
+
+            # list all the available envs
+            boto3.setup_default_session(profile_name=aws_profile)
+            s3 = boto3.client('s3')
+
+            objects_dict = dict()
+            list_objects_resp = s3.list_objects_v2(Bucket=remote_bucket)
+            if "Contents" in list_objects_resp:
+                for object_json in list_objects_resp['Contents']:
+                    object_row = list(object_json.values())
+                    print_row = []
+                    print_row.append(object_row[0])
+                    print_row.append(object_row[1].strftime("%m/%d/%Y, %H:%M:%S"))
+                    print_row.append(str(format(object_row[3]/1048576.0, '.2f')))
+                    print_row.append(object_row[4])
+                    table.add_row(*print_row)
+
+            console.print(table)
+        else:
+            console.print("No available environments found in remote repository.")
+
+    else:
+        
+        # show aws profile with remote bucket name
+        console.print("aws profile: {}".format(aws_profile))
+        console.print("remote bucket: {}".format(remote_bucket))
+
+def show_info(envs, config=None, console=None):
+    
+    if not config:
+        config = Config()
+
+    if not console:
+        console = Console()
+
+    if not os.path.exists(config.home_path):
+        console.print("CHEMCONDA_HOME_PATH cannot be empty.")
+
+    if envs:
+        # list all the available envs under the CHEMCONDA_HOME_PATH
+        console.print("Available environments: ")
+        env_names = [os.path.basename(dirpath) for dirpath in glob(os.path.join(config.home_path, 'envs/*'))]
+        for env_name in env_names:
+            console.print("- {}".format(env_name))
+    else:
+        console.print("Local configuration in ~/.config/chemconda/config.yaml: ")
+        console.print(config.args_dict())
