@@ -12,7 +12,7 @@ class RichHelpCommand(click.Command):
         super().format_help(ctx, formatter)
 
         example_source_code = """
-    chemconda setup -d /root/miniconda3 -v Miniconda3-py39_4.9.2-Linux-x86_64.sh
+    chemconda pull -d /root -s miniconda3-v0.0.tar.gz
         """
 
         # customize the output
