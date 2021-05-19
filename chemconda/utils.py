@@ -401,7 +401,8 @@ def fetch_conda_env(dst, src, auto_add_kernels=True, config=None, console=None):
     if not console:
         console = Console()
 
-    if os.path.exists(dst):
+    console.print("Ready to untar a Miniconda3 under the {}".format(dst))
+    if os.path.exists(os.path.join(dst, 'miniconda3')):
         console.print("CHEMCONDA_HOME_PATH {} has already existed.".format(config.home_path))
     
     # download and decompress to config.download_dir
@@ -443,3 +444,50 @@ def fetch_conda_env(dst, src, auto_add_kernels=True, config=None, console=None):
         if config.home_path != os.path.abspath(os.path.expanduser(dst)):
             # overwrite the CHEMCONDA_HOME_PATH in the ~/.chemconda/config.yaml file
             config.home_path = dst
+
+def publish_conda_env(dst, src, config=None, console=None):
+    # expand user path to abspath
+    src = os.path.expanduser(src)
+
+    if not config:
+        config = Config()
+    
+    if not console:
+        console = Console()
+
+    console.print("Ready to upload the package: {}.".format(dst))
+    if not os.path.exists(src):
+        raise Exception("Miniconda3 does not exist in the path.".format(src))
+
+    # download and decompress to config.download_dir
+    aws_profile = config.aws_profile
+    remote_bucket = config.aws_s3_bucket
+
+    boto3.setup_default_session(profile_name=aws_profile)
+    s3 = boto3.client('s3')
+
+    # tar-and-upload the package
+    tar_fname = dst
+    if not tar_fname.endswith(".tar.gz"):
+        tar_fname = '{}.tar.gz'.format(dst)
+
+    # start tar-compressing
+    tar_fpath = os.path.join("/tmp", tar_fname)
+    console.print("Start tar compressing {}.".format(tar_fpath))
+    tar = tarfile.open(tar_fpath, "w:gz")
+    tar.add(src)
+    tar.close()
+    console.print("Successfully generated.")
+
+    # start uploading 
+    console.print("Start uploading tar file to {}...".format(tar_fname))
+    with open(tar_fpath, 'rb') as data:
+        s3.upload_fileobj(data, remote_bucket, tar_fname)
+    console.print("Sucessfully uploaded.")
+
+    # remove package tmp file if successfully uploaded
+    os.remove(tar_fpath)
+    if not os.path.exists(tar_fpath):
+        console.print("Temp file cleared.")
+    else:
+        console.print("Failed to clear temp file {}.".format(tar_fpath))
