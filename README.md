@@ -121,6 +121,13 @@ You should take care of setting the AWS credential and AWS S3 by yourself, for m
 
 The credential usage is prefered to be picked by AWS_PROFILE, which could be set by ENV VAR `CHEMCONDA_AWS_PROFILE` or inside ~/.config/chemconda/config.yaml. Also, you can specify the AWS Bucket through ENV VAR `CHEMCONDA_AWS_S3_BUCKET` or in the ~/.config/chemconda/config.yaml file.
 
+#### Customized a remote repo:
+Also, chemconda has provided sub-cmd to publish packages to your self-host S3 bucket. So you can quickly publish your local Miniconda3 as a accessible remote environment which could be installed by `chemconda pull`. The sub-cmd below shows how to compress and publish a local miniconda3 directory:
+
+```shell
+chemconda publish -d miniconda3-v0.0 -s ./miniconda3
+```
+
 ### 7. (Upcoming) New a conda env from environment.yaml (from chemconda templates library)
 
 `chemconda` has created and tested various of conda templates under the `./template` directory. The manifest of the templates are listed below:
