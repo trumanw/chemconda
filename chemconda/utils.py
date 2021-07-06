@@ -251,6 +251,14 @@ def add_existed_kernel(env_name, config=None, console=None):
     if not console:
         console = Console()
 
+    conda_bin = 'bin/conda'
+    if not os.path.exists(config.home_path):
+        console.print("CHEMCONDA_HOME_PATH does not exist.")
+    else:
+        conda_bin = os.path.join(config.home_path, "bin/conda")
+        if not os.path.exists(conda_bin):
+            console.print("CHEMCONDA_HOME_PATH({}) does not have any conda envs.".format(conda_bin))
+
     ipython_bin = os.path.join(config.home_path, "envs/{}/bin/ipython".format(env_name))
     if not os.path.exists(ipython_bin):
         os.system("{} install --name {} ipython ipykernel -y".format(conda_bin, env_name))
